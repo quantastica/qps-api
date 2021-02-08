@@ -41,6 +41,6 @@ setup(
     namespace_packages=['quantastica'],
     packages=find_namespace_packages(),
     include_package_data=True,
-    install_requires=[],
+    install_requires=["os", "configparser", "requests", "time"],
     entry_points={},
 )
