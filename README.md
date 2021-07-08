@@ -5,9 +5,17 @@ Python wrapper for [Quantum Programming Studio](https://quantum-circuit.com/) HT
 
 # Quick start
 
-**1. Find your QPS API token:** [login](https://quantum-circuit.com/login) to Quantum Programming Studio, go to [Profile -> API Access](https://quantum-circuit.com/user_settings/api) and copy your API token.
+**1. Install QPS API package:**
 
-**2. Run this once** to configure your account:
+```bash
+pip install quantastica-qps-api
+```
+
+**2. Find your QPS API token:**
+
+[Login](https://quantum-circuit.com/login) to Quantum Programming Studio, go to [Profile -> API Access](https://quantum-circuit.com/user_settings/api) and copy your API token.
+
+**3. Configure QPS API package with your API token:**
 
 ```python
 
@@ -17,11 +25,11 @@ QPS.save_account("YOUR_API_TOKEN")
 
 ```
 
-That will create a local configuration file where your API token will be stored.
+That will create a local configuration file where your API token will be stored for future use.
 
 **Now you are ready to use QPS API.**
 
-**Example:** find circuit from initial/final vector pairs using Quantum Algorithm Generator
+**Quick start example:** find circuit from initial/final vector pairs using Quantum Algorithm Generator
 
 ```python
 
@@ -848,13 +856,13 @@ Keys important to user are:
 	"program" : Array,
 	"diff"    : Float,
 	"index"   : Integer,
-	"qasm"    : Array of String
+	"qasm"    : String
 }
 ```
 
 Key important to user is:
 
-- `qasm` Array of Strings: each string is OpenQASM 2.0 source code of the resulting circuit.
+- `qasm` OpenQASM 2.0 source code of the resulting circuit.
 
 
 **Example job object with output:**
@@ -954,3 +962,48 @@ Key important to user is:
 	"finishedAt": "2021-02-06T23:39:30.383Z"
 }
 ```
+
+
+## Using Generator with Qiskit
+
+Generator is using OpenQASM 2.0 format for input and output, so integration with Qiskit (and other frameworks that support QASM) is easy.
+
+**Example** transpile Qiskit circuit:
+
+```python
+
+from qiskit import QuantumCircuit
+from qiskit.circuit.random import random_circuit
+from qiskit.quantum_info import Operator
+
+from quantastica.qps_api import QPS
+
+# Generate random Qiskit circuit
+qc = random_circuit(5, 5, measure=False)
+
+# Get QASM code
+input_qasm = qc.qasm()
+
+# Transpile with generator
+job_id = QPS.generator.transpile(input_qasm, settings = { "instruction_set": ["id", "u3", "cx"], "diff_method": "ignorephase" })
+job = QPS.generator.get_job(job_id, wait=True)
+job_status = job["status"]
+job_output = job["output"]
+if(job_status == "error"):
+    raise Exception(job_output["message"])
+
+transpiled_circuit = job_output["circuits"][0]
+
+# Get QASM code
+transpiled_qasm = transpiled_circuit["qasm"]
+
+# Create Qiskit circuit
+transpiled_qc = QuantumCircuit.from_qasm_str(transpiled_qasm)
+
+# Show circuit
+print("Depth:", transpiled_qc.depth())
+print("Ops:", sum(j for i, j in transpiled_qc.count_ops().items()))
+display(transpiled_qc.draw(output="mpl"))
+
+```
+
