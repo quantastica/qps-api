@@ -2,6 +2,9 @@ import os
 import configparser
 import requests
 import time
+import csv
+from io import StringIO
+from copy import deepcopy
 
 
 def _urljoin(*args):
@@ -282,9 +285,100 @@ class QGENAPI:
 		return self.solve(problem, settings, start_job)
 
 
-	def circuit_from_truth_table(self, truth_table, column_defs, additional_qubits=1, job_name=None, settings={}, start_job=True):
-		# !!! TODO
-		return
+	def circuit_from_truth_table(self, truth_table_csv, column_defs, additional_qubits=1, job_name=None, settings={}, start_job=True):
+		# parse CSV string
+		f = StringIO(truth_table_csv.lstrip())
+		reader = csv.reader(f, delimiter=',')
+
+		# read first line
+		first_line = next(reader)
+
+		# check if number of columns match number of column_defs
+		if(len(column_defs) != len(first_line)):
+			raise Exception("Number of columns (" + str(len(first_line)) + ") doesn't match number of column_defs (" + str(len(column_defs)) + ")")
+
+		# check if first line is title
+		first_line_title = False
+		for cell in first_line:
+			if(not cell.isdigit()):
+				first_line_title = True
+				break
+
+		# build proper coldefs
+		coldefs = []
+		col_index = 0
+		for column_def in column_defs:
+			coldef = {}
+
+			# column type
+			if(type(column_def) == str):
+				coldef["type"] = column_def
+			else:
+				coldef = deepcopy(column_def)
+
+			if("type" not in coldef):
+				raise Exception("Column " + str(col_index) + " (0-based) definition doesn't contain \"type\"")
+
+			if(type(coldef["type"]) == str):
+				if(coldef["type"] == "input"):
+					coldef["type"] = 0
+				elif(coldef["type"] == "output"):
+					coldef["type"] = 1
+				elif(coldef["type"] == "" or coldef["type"] == "ignore"):
+					coldef["type"] = -1
+				else:
+					raise Exception("Unknown column type \"" + coldef["type"] + "\"")
+				
+			if(coldef["type"] > 1):
+				raise Exception("Unknown column type \"" + str(coldef["type"]) + "\"")
+				
+			# column index
+			if("index" not in coldef):
+				coldef["index"] = col_index
+
+			#
+			# title
+			#
+			if("title" not in coldef):
+				if(first_line_title):
+					coldef["title"] = first_line[col_index]
+				else:
+					coldef["title"] = "Col" + str(col_index)
+
+			coldefs.append(coldef)
+			col_index += 1
+			
+		# sort coldefs by index
+		coldefs.sort(key=lambda x: x["index"])
+
+		# check if col indexes are unique
+		col_indexes = list(o["index"] for o in coldefs)    
+		if len(col_indexes) > len(set(col_indexes)):
+			raise Exception("Column indexes are not unique.")
+
+		# create problem
+		problem = {
+			"type": "truth",
+			"source": {
+				"truth": {
+					"text": truth_table_csv,
+					"coldefs": coldefs,
+					"numNonOverlapingQubits": additional_qubits
+				}
+			},
+			"settings": {
+				"allowed_gates": "x,cx,ccx,swap",
+				"max_diff": 1e-3,
+				"diff_method": "distance",
+				"single_solution": True,
+				"pre_processing": ""
+			}
+		}
+
+		if(job_name is not None):
+			problem["name"] = job_name
+
+		return self.solve(problem, settings, start_job)
 
 
 class QPSAPI:
