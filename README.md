@@ -712,6 +712,78 @@ cu1 (1.570796370506287) q[0], q[1];
 h q[1];
 ```
 
+
+## Create algorithm from truth table
+
+Create circuit which implements logical expression whose truth table is given.
+
+### QPS.generator.circuit_from_truth_table(truth_table_csv, column_defs, csv_delimiter=None, additional_qubits=1, job_name=None, settings={}, start_job=True):
+
+- `truth_table_csv` is string containing truth table in CSV format
+
+- `column_defs` list of strings describing each column from truth table: `"input"`, `"output"` or `"ignore"`
+
+- `csv_delimiter` CSV column delimiter char: `None`, `","` (comma) or `"\t"` (tab). If delimiter is `None` (default) it will be automatically detected.
+
+- `additional_qubits` number of qubits to add (to displace input and output qubits).
+
+- `job_name` string is optional. You can give it a human readable name.
+
+- `settings` object is optional. Default is:
+
+```python
+{
+	"allowed_gates": "x,cx,ccx,swap",
+	"max_diff": 1e-3,
+	"diff_method": "distance",
+	"single_solution": True,
+	"pre_processing": ""
+}
+```
+
+**Example:**
+
+```python
+
+from quantastica.qps_api import QPS
+
+truth_table = """
+A,B,A_NAND_B
+0,0,1
+0,1,1
+1,0,1
+1,1,0
+"""
+
+job_id = QPS.generator.circuit_from_truth_table(truth_table, ["input", "input", "output"])
+
+job = QPS.generator.get_job(job_id, wait=True)
+
+job_status = job["status"]
+job_output = job["output"]
+
+if(job_status == "error"):
+	raise Exception(job_output["message"])
+else:
+	if(len(job_output["circuits"]) == 0):
+		raise Exception("No results.")
+	else:
+		for circuit in job_output["circuits"]:
+			print(circuit["qasm"])
+
+```
+
+Example output:
+
+```
+OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[3];
+x q[2];
+ccx q[0], q[1], q[2];
+```
+
+
 ## Run problem file
 
 Solve problem provided in internal format used by generator.

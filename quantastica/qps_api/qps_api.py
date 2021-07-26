@@ -285,10 +285,17 @@ class QGENAPI:
 		return self.solve(problem, settings, start_job)
 
 
-	def circuit_from_truth_table(self, truth_table_csv, column_defs, additional_qubits=1, job_name=None, settings={}, start_job=True):
+	def circuit_from_truth_table(self, truth_table_csv, column_defs, csv_delimiter=None, additional_qubits=1, job_name=None, settings={}, start_job=True):
+		# auto-detect delimiter
+		delimiter = csv_delimiter
+		if(delimiter is None or delimiter == ""):
+			count_commas = truth_table_csv.count(",")
+			count_tabs = truth_table_csv.count("\t")
+			delimiter = "," if count_commas > count_tabs else "\t"
+
 		# parse CSV string
 		f = StringIO(truth_table_csv.lstrip())
-		reader = csv.reader(f, delimiter=',')
+		reader = csv.reader(f, delimiter=delimiter)
 
 		# read first line
 		first_line = next(reader)
@@ -328,10 +335,10 @@ class QGENAPI:
 					coldef["type"] = -1
 				else:
 					raise Exception("Unknown column type \"" + coldef["type"] + "\"")
-				
+
 			if(coldef["type"] > 1):
 				raise Exception("Unknown column type \"" + str(coldef["type"]) + "\"")
-				
+
 			# column index
 			if("index" not in coldef):
 				coldef["index"] = col_index
@@ -347,7 +354,7 @@ class QGENAPI:
 
 			coldefs.append(coldef)
 			col_index += 1
-			
+
 		# sort coldefs by index
 		coldefs.sort(key=lambda x: x["index"])
 
