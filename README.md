@@ -547,13 +547,22 @@ u3 (1.570796370506287, 0, 1.217840194702148) q[0];
 u3 (1.570796370506287, 0, 0.621559917926788) q[1];
 ```
 
+
 ## Transpile
 
 Transpile circuit (change instruction set).
 
-### QPS.generator.transpile(input_qasm, job_name=None, settings = {}, start_job=True):
+### QPS.generator.transpile(input_qasm, method="replace_blocks", method_options={}, job_name=None, settings = {}, start_job=True):
 
-- `input_qasm` is string containing OpenQASM 2.0 code. 
+- `input_qasm` is string containing OpenQASM 2.0 code.
+
+- `method` is method name string. Can be one of: "replace_circuit", "replace_blocks", "replace_gates". Default: "replace_blocks".
+
+- `method_options` dict with following structure:
+
+	- If method is `replace_blocks` then: `{ "block_size": 2, "two_pass": False }` (maximum block size is 4).
+
+	- For other methods: no options (`method_options` is ignored)
 
 - `job_name` string is optional. You can give it a human readable name.
 

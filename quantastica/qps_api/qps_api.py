@@ -38,6 +38,7 @@ class QGENAPI:
 
 				return status_response
 
+
 	def solve(self, problem, settings = {}, start_job=True):
 		if("settings" not in problem):
 			problem["settings"] = {}
@@ -214,14 +215,13 @@ class QGENAPI:
 		return get_job_result
 
 
-	def transpile(self, input_qasm, job_name=None, settings = {}, start_job=True):
+	def transpile(self, input_qasm, method="replace_blocks", method_options = {}, job_name=None, settings = {}, start_job=True):
 		problem = {
 			"type": "circuit",
 			"source": {
 				"circuit": {
 					"qasm": input_qasm,
-					"method": "replace_blocks",
-					"two_pass": True
+					"method": method
 				}
 			},
 			"settings": {
@@ -236,6 +236,10 @@ class QGENAPI:
 		if(job_name is not None):
 			problem["name"] = job_name
 		
+		for key in method_options.keys():
+			if(key != "qasm" and key != "method"):
+				problem["source"]["circuit"][key] = method_options[key]
+
 		return self.solve(problem, settings, start_job)
 
 
