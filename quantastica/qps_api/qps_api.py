@@ -14,29 +14,7 @@ class QGENAPI:
 	def __init__(self, qps_api):
 		self.qps_api = qps_api
 
-		self.http_timeout = 2
-		self.http_max_retries = 3
-
 		return
-
-	def http_post(self, url, headers, json):
-		timeout_counter = 0
-
-		while True:
-			try:
-				status_response = requests.post(url = url, headers = headers, json = json, timeout = self.http_timeout)
-			except Exception as e:
-				if(type(e) == requests.exceptions.ConnectTimeout):
-					timeout_counter += 1
-
-					if(timeout_counter >= self.http_max_retries):
-						raise
-				else:
-					raise
-			else:
-				status_response.raise_for_status()
-
-				return status_response
 
 
 	def solve(self, problem, settings = {}, start_job=True):
@@ -59,7 +37,7 @@ class QGENAPI:
 		#
 		create_url = _urljoin(self.qps_api.api_url, "generator", "job", "create")
 
-		create_response = self.http_post(url = create_url, headers = headers, json = problem)
+		create_response = self.qps_api.http_post(url = create_url, headers = headers, json = problem)
 		
 		create_response.raise_for_status()
 		create_result = create_response.json()
@@ -86,7 +64,7 @@ class QGENAPI:
 		if(status_filter is not None):
 			list_data["status"] = status_filter
 
-		list_response = self.http_post(url = list_url, headers = headers, json = list_data)
+		list_response = self.qps_api.http_post(url = list_url, headers = headers, json = list_data)
 		
 		list_response.raise_for_status()
 		list_result = list_response.json()
@@ -103,7 +81,7 @@ class QGENAPI:
 		status_url = _urljoin(self.qps_api.api_url, "generator", "job", "status")
 		status_data = { "_id": job_id }
 		
-		status_response = self.http_post(url = status_url, headers = headers, json = status_data)
+		status_response = self.qps_api.http_post(url = status_url, headers = headers, json = status_data)
 
 		status_response.raise_for_status()
 		status_result = status_response.json()
@@ -120,7 +98,7 @@ class QGENAPI:
 		stop_url = _urljoin(self.qps_api.api_url, "generator", "job", "stop")
 		stop_data = { "_id": job_id }
 		
-		stop_response = self.http_post(url = stop_url, headers = headers, json = stop_data)
+		stop_response = self.qps_api.http_post(url = stop_url, headers = headers, json = stop_data)
 
 		stop_response.raise_for_status()
 		stop_result = stop_response.json()
@@ -139,7 +117,7 @@ class QGENAPI:
 		if(status_filter is not None):
 			stop_data["status"] = status_filter
 
-		stop_response = self.http_post(url = stop_url, headers = headers, json = stop_data)
+		stop_response = self.qps_api.http_post(url = stop_url, headers = headers, json = stop_data)
 		
 		stop_response.raise_for_status()
 		stop_result = stop_response.json()
@@ -156,7 +134,7 @@ class QGENAPI:
 		start_url = _urljoin(self.qps_api.api_url, "generator", "job", "start")
 		start_data = { "_id": job_id }
 		
-		start_response = self.http_post(url = start_url, headers = headers, json = start_data)
+		start_response = self.qps_api.http_post(url = start_url, headers = headers, json = start_data)
 
 		start_response.raise_for_status()
 		start_result = start_response.json()
@@ -178,7 +156,7 @@ class QGENAPI:
 			status_data = { "_id": job_id }
 			
 			while True:
-				status_response = self.http_post(url = status_url, headers = headers, json = status_data)
+				status_response = self.qps_api.http_post(url = status_url, headers = headers, json = status_data)
 
 				status_response.raise_for_status()
 
@@ -200,7 +178,7 @@ class QGENAPI:
 		#
 		get_job_url = _urljoin(self.qps_api.api_url, "generator", "job", "get")
 		get_job_data = { "_id": job_id }
-		get_job_response = self.http_post(url = get_job_url, headers = headers, json = get_job_data)
+		get_job_response = self.qps_api.http_post(url = get_job_url, headers = headers, json = get_job_data)
 
 		get_job_response.raise_for_status()
 
@@ -414,16 +392,73 @@ class QGENAPI:
 		return self.solve(problem, settings, start_job)
 
 
+
+
+class QCONVERTAPI:
+	def __init__(self, qps_api):
+		self.qps_api = qps_api
+
+		return
+
+
+	def convert(self, input_data, source_format, dest_format):
+		#
+		# HTTP headers
+		#
+		headers = {"Authorization": "Bearer " + self.qps_api.api_token }
+
+		convert_url = _urljoin(self.qps_api.api_url, "qconvert")
+		convert_data = {}
+		convert_data["input"] = str(input_data)
+		convert_data["source"] = str(source_format)
+		convert_data["dest"] = str(dest_format)
+
+
+		convert_response = self.qps_api.http_post(url = convert_url, headers = headers, json = convert_data)
+		
+		convert_response.raise_for_status()
+		convert_result = convert_response.text
+
+		return convert_result
+
+
+
 class QPSAPI:
 
 	def __init__(self):
 		self.api_token = ""
 		self.api_url = "https://quantum-circuit.com/api"
+
+		self.http_timeout = 2
+		self.http_max_retries = 3
+
 		self.load_account()
 
 		self.generator = QGENAPI(self)
 
+		self.converter = QCONVERTAPI(self)
+
 		return
+
+
+	def http_post(self, url, headers, json):
+		timeout_counter = 0
+
+		while True:
+			try:
+				status_response = requests.post(url = url, headers = headers, json = json, timeout = self.http_timeout)
+			except Exception as e:
+				if(type(e) == requests.exceptions.ConnectTimeout):
+					timeout_counter += 1
+
+					if(timeout_counter >= self.http_max_retries):
+						raise
+				else:
+					raise
+			else:
+				status_response.raise_for_status()
+
+			return status_response
 
 
 	def config_path(self):

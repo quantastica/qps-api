@@ -80,6 +80,7 @@ Default configuration file path:
 - On Windows, USERPROFILE will be used if set, otherwise a combination of HOMEPATH and HOMEDRIVE will be used.
 
 
+
 # Quantum Algorithm Generator API
 
 [Quantum Algorithm Generator](https://quantastica.com/#generator) is a tool based on machine learning which reverse engineers quantum circuits from state vectors (wave functions). Additionally, it can be used to find quantum algorithm for boolean function from truth table, to transpile circuits and to decompose unitary matrices.
@@ -1052,7 +1053,6 @@ Generator is using OpenQASM 2.0 format for input and output, so integration with
 **Example** transpile Qiskit circuit:
 
 ```python
-
 from qiskit import QuantumCircuit
 from qiskit.circuit.random import random_circuit
 from qiskit.quantum_info import Operator
@@ -1088,3 +1088,100 @@ display(transpiled_qc.draw(output="mpl"))
 
 ```
 
+
+# Quantum Language Converter API
+
+[Quantum Language Converter](https://quantastica.com/#converters) is a tool which converts quantum program between different quantum programming languages and frameworks. It is also available as a [q-convert](https://www.npmjs.com/package/q-convert) command line tool and as a web UI at [https://quantum-circuit.com/qconvert](https://quantum-circuit.com/qconvert).
+
+QPS has integrated quantum language converter API which you can access directly from python code:
+
+
+
+### QPS.converter.convert(input, source, dest)
+
+Converts `input` quantum program given as string from `source` format into `dest` format.
+
+- `input` String. Program source code
+
+- `source` String. Input format:
+
+	- `qasm` [OpenQASM 2.0](https://github.com/Qiskit/openqasm) source code
+	- `quil` [Quil](https://arxiv.org/abs/1608.03355) source code
+	- `qobj` [QObj](https://arxiv.org/abs/1809.03452)
+	- `quantum-circuit` [quantum-circuit](https://quantum-circuit.com) object (json)
+	- `toaster` [Qubit Toaster](https://quantastica.com/#toaster) object (json)
+
+- `dest` String. Output format:
+
+	- `qiskit` [Qiskit](https://qiskit.org/documentation/)
+	- `qasm` [OpenQASM 2.0](https://github.com/Qiskit/openqasm)
+	- `qobj` [QObj](https://arxiv.org/abs/1809.03452)
+	- `quil` [Quil](https://arxiv.org/abs/1608.03355)
+	- `pyquil` [pyQuil](http://docs.rigetti.com/en/latest/index.html)
+	- `braket` [Braket](https://docs.aws.amazon.com/braket/)
+	- `cirq` [Cirq](https://github.com/quantumlib/Cirq)
+	- `tfq` [TensorFlow Quantum](https://www.tensorflow.org/quantum)
+	- `qsharp` [QSharp](https://docs.microsoft.com/en-us/quantum/language/index?view=qsharp-preview)
+	- `quest` [QuEST](https://quest.qtechtheory.org/)
+	- `js` [quantum-circuit](https://www.npmjs.com/package/quantum-circuit) (javascript)
+	- `quantum-circuit` [quantum-circuit](https://www.npmjs.com/package/quantum-circuit) (json)
+	- `toaster` [Qubit Toaster](https://quantastica.com/toaster/)
+	- `svg` [SVG (standalone)](https://www.w3.org/Graphics/SVG/)
+	- `svg-inline` [SVG (inline)](https://www.w3.org/Graphics/SVG/)
+
+
+
+**Example 1** - convert QASM 2.0 program to QUIL:
+
+```python
+from quantastica.qps_api import QPS
+
+input_program = """
+OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[2];
+creg c[2];
+h q[0];
+cx q[0], q[1];
+measure q[0] -> c[0];
+measure q[1] -> c[1];
+"""
+
+output_program = QPS.converter.convert(input_program, "qasm", "quil")
+
+print(output_program)
+
+```
+
+Output:
+
+```
+DECLARE ro BIT[2]
+H 0
+CNOT 0 1
+MEASURE 0 ro[0]
+MEASURE 1 ro[1]
+```
+
+
+**Example 2** - convert QASM 2.0 program to circuit drawing as vector image:
+
+```python
+from quantastica.qps_api import QPS
+
+input_program = """
+OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[2];
+creg c[2];
+h q[0];
+cx q[0], q[1];
+measure q[0] -> c[0];
+measure q[1] -> c[1];
+"""
+
+output_svg = QPS.converter.convert(input_program, "qasm", "svg")
+
+open("output.svg", "w").write(output_svg)
+
+```
