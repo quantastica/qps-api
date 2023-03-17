@@ -3,7 +3,7 @@
 Python wrapper for [Quantum Programming Studio](https://quantum-circuit.com/) HTTP API.
 
 
-# Quick start
+## Quick start
 
 **1. Install QPS API package:**
 
@@ -58,9 +58,9 @@ else:
 ```
 
 
-# Account management
+## Account management
 
-### QPS.save_account(api_token, api_url=None)
+**QPS.save_account(api_token, api_url=None)**
 
 **Run this once** to setup your QPS REST API account. Method will create configuration file and your api token will be stored there for future use.
 
@@ -69,7 +69,7 @@ If needed, you can clear your token by running `QPS.save_account("")` (or by del
 If `api_url` is not provided then `https://quantum-circuit.com/api/` will be set as default.
 
 
-### QPS.config_path()
+**QPS.config_path()**
 
 You can get config file path by running `QPS.config_path()`.
 
@@ -81,18 +81,18 @@ Default configuration file path:
 
 
 
-# Quantum Algorithm Generator API
+## Quantum Algorithm Generator API
 
 [Quantum Algorithm Generator](https://quantastica.com/#generator) is a tool based on machine learning which reverse engineers quantum circuits from state vectors (wave functions). Additionally, it can be used to find quantum algorithm for boolean function from truth table, to transpile circuits and to decompose unitary matrices.
 
 
-## Generator job management
+### Generator job management
 
 Problem sent to generator is called a "job". Each job has unique ID. As generator is resource intensive tool, it is configured to execute only one job at a time. While generator is solving a job, other jobs are queued. When generator finishes executing a job, it takes the next one from the queue.
 
 API provides functions for job manipulation: you can list all jobs (filtered by status), stop running job, cancel queued jobs, stop/cancel all jobs, start previously canceled (draft) job, etc.
 
-### QPS.generator.list_jobs(status_filter=None)
+**QPS.generator.list_jobs(status_filter=None)**
 
 List all jobs, optionally filtered by status.
 
@@ -148,7 +148,7 @@ Example output:
 ```
 
 
-### QPS.generator.job_status(job_id)
+**QPS.generator.job_status(job_id)**
 
 Get job status.
 
@@ -171,7 +171,7 @@ Example output:
 ```
 
 
-### QPS.generator.get_job(job_id, wait=True)
+**QPS.generator.get_job(job_id, wait=True)**
 
 Get generator job referenced by ID. If `wait` argument is `True` (default), then function will wait for a job to finish (or fail) before returning. If `wait` is `False`, then job will be immediatelly returned even if it is still running (in which case it will not contain a solution).
 
@@ -244,7 +244,8 @@ Example output:
 					}
 				],
 				"index": 0,
-				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[0];\ncx q[0], q[1];\n"
+				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[0];\ncx q[0], q[1];\n",
+				"qasmExt": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[0];\ncx q[0], q[1];\n"
 			},
 			{
 				"qubits": 2,
@@ -269,7 +270,8 @@ Example output:
 					}
 				],
 				"index": 1,
-				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[1];\ncx q[1], q[0];\n"
+				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[1];\ncx q[1], q[0];\n",
+				"qasmExt": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[1];\ncx q[1], q[0];\n"				
 			}
 		],
 		"error_code": 0,
@@ -283,7 +285,7 @@ Example output:
 }
 ```
 
-### QPS.generator.stop_job(job_id)
+**QPS.generator.stop_job(job_id)**
 
 Stop running or cancel queued job. Job will be put into `draft` state, and you can start it again later by calling `start_job()`.
 
@@ -306,7 +308,7 @@ Example output:
 ```
 
 
-### QPS.generator.stop_all_jobs(status_filter=None)
+**QPS.generator.stop_all_jobs(status_filter=None)**
 
 Stop running job / cancel all queued jobs.
 
@@ -380,7 +382,7 @@ Example output:
 ```
 
 
-### QPS.generator.start_job(job_id)
+**QPS.generator.start_job(job_id)**
 
 Start previously stopped/canceled job (can be any job with status `draft`).
 
@@ -403,11 +405,11 @@ Example output:
 ```
 
 
-## Circuit from vectors
+### Circuit from vectors
 
 Find quantum circuit from pairs of initial & final state vectors (wave functions).
 
-### QPS.generator.circuit_from_vectors(vector_pairs, endianness = "little", job_name=None, settings = {}, start_job=True)
+**QPS.generator.circuit_from_vectors(vector_pairs, endianness = "little", job_name=None, settings = {}, start_job=True)**
 
 - `vector_pairs` is list containing vector pairs. Each vector pair is list with 2 elements: initial vector and final vector. All vectors in all pairs must be of same length (same number of qubits).
 
@@ -498,11 +500,11 @@ cu1 (2.356194496154785) q[0], q[1];
 h q[1];
 ```
 
-## State preparation
+### State preparation
 
 Get circuit which will transform ground state (all qubits reset) to desired final state vector.
 
-### QPS.generator.state_preparation(final_vector, endianness = "little", job_name=None, settings = {}, start_job=True)
+**QPS.generator.state_preparation(final_vector, endianness = "little", job_name=None, settings = {}, start_job=True)**
 
 - `final_vector` is target vector.
 
@@ -549,11 +551,11 @@ u3 (1.570796370506287, 0, 0.621559917926788) q[1];
 ```
 
 
-## Transpile
+### Transpile
 
 Transpile circuit (change instruction set).
 
-### QPS.generator.transpile(input_qasm, method="replace_blocks", method_options={}, job_name=None, settings = {}, start_job=True):
+**QPS.generator.transpile(input_qasm, method="replace_blocks", method_options={}, job_name=None, settings = {}, start_job=True)**
 
 - `input_qasm` is string containing OpenQASM 2.0 code.
 
@@ -629,11 +631,11 @@ sx q[0];
 cx q[0], q[1];
 ```
 
-## Decompose matrix
+### Decompose matrix
 
 Decompose unitary matrix (find circuit from matrix).
 
-### QPS.generator.decompose_unitary(unitary, endianness = "big", job_name=None, settings = {}, start_job=True)
+**QPS.generator.decompose_unitary(unitary, endianness = "big", job_name=None, settings = {}, start_job=True)**
 
 - `unitary` matrix operator.
 
@@ -723,11 +725,11 @@ h q[1];
 ```
 
 
-## Create algorithm from truth table
+### Create algorithm from truth table
 
 Create circuit which implements logical expression whose truth table is given.
 
-### QPS.generator.circuit_from_truth_table(truth_table_csv, column_defs, csv_delimiter=None, additional_qubits=1, job_name=None, settings={}, start_job=True):
+**QPS.generator.circuit_from_truth_table(truth_table_csv, column_defs, csv_delimiter=None, additional_qubits=1, job_name=None, settings={}, start_job=True)**
 
 - `truth_table_csv` is string containing truth table in CSV format
 
@@ -794,11 +796,11 @@ ccx q[0], q[1], q[2];
 ```
 
 
-## Run problem file
+### Run problem file
 
 Solve problem provided in internal format used by generator.
 
-### QPS.generator.solve(problem, settings = {}, start_job=True)
+**QPS.generator.solve(problem, settings = {}, start_job=True)**
 
 - `problem` object - generator job exported to json from QPS.
 
@@ -884,7 +886,7 @@ cx q[1], q[0];
 ```
 
 
-## Generator output format
+### Generator output format
 
 Generator job object has following structure:
 
@@ -938,13 +940,37 @@ Keys important to user are:
 	"program" : Array,
 	"diff"    : Float,
 	"index"   : Integer,
-	"qasm"    : String
+	"qasm"    : String,
+	"qasmExt" : String
 }
 ```
 
-Key important to user is:
+Keys important to user are:
 
 - `qasm` OpenQASM 2.0 source code of the resulting circuit.
+
+- `qasmExt` OpenQASM 2.0 with extended instruction set (all gates supported by Quantum Programming Studio).
+
+Difference between `qasm` and `qasmExt`: if circuit contains gate supported by QPS but not directly supported by OpenQASM 2.0 then `qasm` will contain equivalent circuit transpiled to OpenQASM 2.0 instruction set, but `qasmExt` will contain gates as is.
+
+For example if circuit contains IONQ native gate `gpi2(2.51678906856393)` on first qubit:
+
+`qasm` will be:
+
+```
+OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[1];
+u3 (1.5707963267948966, 0.9459927417690333, -0.9459927417690333) q[0];
+```
+
+`qasmExt` will contain:
+```
+OPENQASM 2.0;
+include "qelib1.inc";
+qreg q[1];
+gpi2 (2.51678906856393) q[0];
+```
 
 
 **Example job object with output:**
@@ -1004,7 +1030,8 @@ Key important to user is:
 					}
 				],
 				"index": 0,
-				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[0];\ncx q[0], q[1];\n"
+				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[0];\ncx q[0], q[1];\n",
+				"qasmExt": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[0];\ncx q[0], q[1];\n"
 			},
 			{
 				"qubits": 2,
@@ -1029,7 +1056,8 @@ Key important to user is:
 					}
 				],
 				"index": 1,
-				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[1];\ncx q[1], q[0];\n"
+				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[1];\ncx q[1], q[0];\n",
+				"qasmExt": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[1];\ncx q[1], q[0];\n"
 			}
 		],
 		"error_code": 0,
@@ -1046,7 +1074,7 @@ Key important to user is:
 ```
 
 
-## Using Generator with Qiskit
+### Using Generator with Qiskit
 
 Generator is using OpenQASM 2.0 format for input and output, so integration with Qiskit (and other frameworks that support QASM) is easy.
 
@@ -1089,7 +1117,7 @@ display(transpiled_qc.draw(output="mpl"))
 ```
 
 
-# Quantum Language Converter API
+## Quantum Language Converter API
 
 [Quantum Language Converter](https://quantastica.com/#converters) is a tool which converts quantum program between different quantum programming languages and frameworks. It is also available as a [q-convert](https://www.npmjs.com/package/q-convert) command line tool and as a web UI at [https://quantum-circuit.com/qconvert](https://quantum-circuit.com/qconvert).
 
@@ -1097,7 +1125,7 @@ QPS has integrated quantum language converter API which you can access directly 
 
 
 
-### QPS.converter.convert(input, source, dest)
+**QPS.converter.convert(input, source, dest)**
 
 Converts `input` quantum program given as string from `source` format into `dest` format.
 
@@ -1108,13 +1136,14 @@ Converts `input` quantum program given as string from `source` format into `dest
 	- `qasm` [OpenQASM 2.0](https://github.com/Qiskit/openqasm) source code
 	- `quil` [Quil](https://arxiv.org/abs/1608.03355) source code
 	- `qobj` [QObj](https://arxiv.org/abs/1809.03452)
-	- `quantum-circuit` [quantum-circuit](https://quantum-circuit.com) object (json)
+	- `quantum-circuit` [quantum-circuit](https://www.npmjs.com/package/quantum-circuit) object (json)
 	- `toaster` [Qubit Toaster](https://quantastica.com/#toaster) object (json)
 
 - `dest` String. Output format:
 
 	- `qiskit` [Qiskit](https://qiskit.org/documentation/)
 	- `qasm` [OpenQASM 2.0](https://github.com/Qiskit/openqasm)
+	- `qasm-ext` OpenQASM 2.0 with complete instruction set supported by QPS (and other Quantastica tools)
 	- `qobj` [QObj](https://arxiv.org/abs/1809.03452)
 	- `quil` [Quil](https://arxiv.org/abs/1608.03355)
 	- `pyquil` [pyQuil](http://docs.rigetti.com/en/latest/index.html)
@@ -1185,3 +1214,23 @@ output_svg = QPS.converter.convert(input_program, "qasm", "svg")
 open("output.svg", "w").write(output_svg)
 
 ```
+
+
+## Utils API
+
+**QPS.utils.random_circuit(num_qubits=5, output_format="quantum-circuit", options=None)**
+
+Returns random quantum circuit.
+
+- `num_qubits` Integer. Number of qubits. Default: `5`.
+
+- `format` String. Output format. The same as `QPS.converter.convert()` function's `dest` argument. Example: `"qasm"`. Default: `"quantum-circuit"`.
+
+- `options` Dict. Optional. Can contain following keys:
+
+	- `instruction_set` List of gates to use. Example: `["u3", "cx"]`. Default: `[ "u3", "rx", "ry", "rz", "cx", "cz" ]`.
+	- `num_gates` Integer. Number of gates in the circuit. Default is `num_qubits * 8`.
+	- `mid_circuit_measurement` Bool. Default: `False`.
+	- `mid_circuit_reset` Bool. Default: `False`.
+	- `classic_control` Bool. Default: `False`.
+

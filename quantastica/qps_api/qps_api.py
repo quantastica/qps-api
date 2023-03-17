@@ -422,6 +422,46 @@ class QCONVERTAPI:
 		return convert_result
 
 
+class QUTILSAPI:
+	def __init__(self, qps_api):
+		self.qps_api = qps_api
+
+		return
+
+
+	def random_circuit(self, num_qubits=5, output_format="quantum-circuit", options={}):
+		#
+		# HTTP headers
+		#
+		headers = {"Authorization": "Bearer " + self.qps_api.api_token }
+
+		random_circuit_url = _urljoin(self.qps_api.api_url, "utils", "random_circuit")
+
+		random_circuit_data = {}
+
+		random_circuit_data["num_qubits"] = num_qubits
+		random_circuit_data["format"] = str(output_format)
+
+		if "num_gates" in options:
+			random_circuit_data["num_gates"] = options["num_gates"]
+		if "instruction_set" in options:
+			random_circuit_data["instruction_set"] = options["instruction_set"]
+		if "mid_circuit_measurement" in options:
+			random_circuit_data["mid_circuit_measurement"] = options["mid_circuit_measurement"]
+		if "mid_circuit_reset" in options:
+			random_circuit_data["mid_circuit_reset"] = options["mid_circuit_reset"]
+		if "classic_control" in options:
+			random_circuit_data["classic_control"] = options["classic_control"]
+
+
+		random_circuit_response = self.qps_api.http_post(url = random_circuit_url, headers = headers, json = random_circuit_data)
+		
+		random_circuit_response.raise_for_status()
+		random_circuit_result = random_circuit_response.text
+
+		return random_circuit_result
+
+
 
 class QPSAPI:
 
@@ -429,14 +469,16 @@ class QPSAPI:
 		self.api_token = ""
 		self.api_url = "https://quantum-circuit.com/api"
 
-		self.http_timeout = 2
-		self.http_max_retries = 3
+		self.http_timeout = 3
+		self.http_max_retries = 5
 
 		self.load_account()
 
 		self.generator = QGENAPI(self)
 
 		self.converter = QCONVERTAPI(self)
+
+		self.utils = QUTILSAPI(self)
 
 		return
 
