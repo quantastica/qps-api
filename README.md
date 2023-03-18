@@ -1136,6 +1136,7 @@ Converts `input` quantum program given as string from `source` format into `dest
 	- `qasm` [OpenQASM 2.0](https://github.com/Qiskit/openqasm) source code
 	- `quil` [Quil](https://arxiv.org/abs/1608.03355) source code
 	- `qobj` [QObj](https://arxiv.org/abs/1809.03452)
+	- `ionq` [IONQ](https://docs.ionq.com/) (json)
 	- `quantum-circuit` [quantum-circuit](https://www.npmjs.com/package/quantum-circuit) object (json)
 	- `toaster` [Qubit Toaster](https://quantastica.com/#toaster) object (json)
 
