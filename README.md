@@ -3,7 +3,7 @@
 Python wrapper for [Quantum Programming Studio](https://quantum-circuit.com/) HTTP API.
 
 
-## Quick start
+## Install and configure
 
 **1. Install QPS API package:**
 
@@ -57,13 +57,13 @@ Default configuration file path:
 
 Synthesis and transpilation tool can be used to:
 
-- Create quantum circuit from state vectors
+- create quantum circuit from state vectors
 
-- Create quantum circuit from truth table
+- create quantum circuit from truth table
 
-- Create quantum circuit from unitary matrix (decompose unitary matrix)
+- create quantum circuit from unitary matrix (decompose unitary matrix)
 
-- Transpile circuits (change instruction set)
+- transpile circuits (change instruction set)
 
 
 ### Job management
@@ -488,7 +488,7 @@ h q[1];
 
 ### State preparation
 
-Get circuit which will transform ground state (all qubits reset) to desired final state vector.
+Get circuit which prepares provided state.
 
 **QPS.synth.state_preparation(final_vector, endianness = "little", job_name=None, settings = {}, start_job=True)**
 
