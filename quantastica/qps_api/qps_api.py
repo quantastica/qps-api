@@ -474,7 +474,10 @@ class QPSAPI:
 
 		self.load_account()
 
-		self.generator = QGENAPI(self)
+		self.synth = QGENAPI(self)
+
+		# self.generator is deprecated. Still here for backward compatibility. Remove in the future.
+		self.generator = self.synth
 
 		self.converter = QCONVERTAPI(self)
 
