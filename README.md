@@ -948,7 +948,7 @@ print(jobs)
 
 Example output:
 
-```
+```python
 {
 	"list": [
 		{ "_id": "r9LskFoLPQW5w7HTp", "name": "Bell state", "type": "vectors", "status": "done" },
@@ -974,7 +974,7 @@ print(jobs)
 
 Example output:
 
-```
+```python
 {
 	"list": [
 		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary", "status": "running" }
@@ -1001,7 +1001,7 @@ print(status)
 
 Example output:
 
-```
+```python
 { "_id": "PC5PNXiGqhh2HmkX8", "name": "Experiment", "type": "vectors", "status": "error", "message": "connect ECONNREFUSED" }
 ```
 
@@ -1024,7 +1024,7 @@ print(job)
 
 Example output:
 
-```
+```python
 {
 	"_id": "r9LskFoLPQW5w7HTp",
 	"name": "Bell",
@@ -1140,8 +1140,8 @@ print(response)
 
 Example output:
 
-```
-{ _id: "SNhiCqSCT2WwRWKCd", message: "OK" }
+```python
+{ "_id": "SNhiCqSCT2WwRWKCd", message: "OK" }
 ```
 
 
@@ -1165,7 +1165,7 @@ print(stopped)
 
 Example output:
 
-```
+```python
 {
 	"stopped": [ 
 		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary" },
@@ -1188,7 +1188,7 @@ print(stopped)
 
 Example output:
 
-```
+```python
 {
 	"stopped": [
 		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary" }
@@ -1210,7 +1210,7 @@ print(stopped)
 
 Example output:
 
-```
+```python
 {
 	"stopped": [
 		{ "_id": "R8tJH7XoZ233oTREy", "name": "4Q Gauss", "type": "vectors" }
@@ -1237,8 +1237,8 @@ print(response)
 
 Example output:
 
-```
-{ _id: "SNhiCqSCT2WwRWKCd", message: "OK" }
+```python
+{ "_id": "SNhiCqSCT2WwRWKCd", "message": "OK" }
 ```
 
 
