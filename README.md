@@ -66,327 +66,6 @@ Synthesis and transpilation tool can be used to:
 - transpile circuits (change instruction set)
 
 
-### Job management
-
-Problem sent to solver (synthesizer or transpiler) is called a "job". Each job has unique ID. Solver is resource intensive tool, so it is configured to execute only one job at a time. While solver is processing a job, other jobs are queued. When solver finishes a job, it takes the next one from the queue.
-
-API provides functions for job manipulation: you can list all jobs (filtered by status), stop running job, cancel queued jobs, stop/cancel all jobs, start previously canceled (draft) job, etc.
-
-**QPS.synth.list_jobs(status_filter=None)**
-
-List all jobs, optionally filtered by status.
-
-- `status_filter` String, optional. Can be: `draft`, `queued`, `running`, `error`, `done`.
-
-
-**Example 1** - list all (unfiltered) jobs:
-
-```python
-
-from quantastica.qps_api import QPS
-
-jobs = QPS.synth.list_jobs()
-
-print(jobs)
-
-```
-
-Example output:
-
-```
-{
-	"list": [
-		{ "_id": "r9LskFoLPQW5w7HTp", "name": "Bell state", "type": "vectors", "status": "done" },
-		{ "_id": "R8tJH7XoZ233oTREy", "name": "4Q Gauss", "type": "vectors", "status": "queued" },
-		{ "_id": "h7fzYbFz8MJvkNhiX", "name": "Challenge", "type": "unitary", "status": "draft" },
-		{ "_id": "PC5PNXiGqhh2HmkX8", "name": "Experiment", "type": "vectors", "status": "error"},
-		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary", "status": "running" }
-	]
-}
-```
-
-**Example 2** - list `running` jobs:
-
-```python
-
-from quantastica.qps_api import QPS
-
-jobs = QPS.synth.list_jobs(status_filter="running")
-
-print(jobs)
-
-```
-
-Example output:
-
-```
-{
-	"list": [
-		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary", "status": "running" }
-	]
-}
-```
-
-
-**QPS.synth.job_status(job_id)**
-
-Get job status.
-
-**Example:**
-
-```python
-
-from quantastica.qps_api import QPS
-
-status = QPS.synth.job_status("PC5PNXiGqhh2HmkX8")
-
-print(status)
-
-```
-
-Example output:
-
-```
-{ "_id": "PC5PNXiGqhh2HmkX8", "name": "Experiment", "type": "vectors", "status": "error", "message": "connect ECONNREFUSED" }
-```
-
-
-**QPS.synth.get_job(job_id, wait=True)**
-
-Get job referenced by ID. If `wait` argument is `True` (default), then function will wait for a job to finish (or fail) before returning. If `wait` is `False`, then job will be immediatelly returned even if it is still running (in which case it will not contain a solution).
-
-**Example:**
-
-```python
-
-from quantastica.qps_api import QPS
-
-job = QPS.synth.get_job("r9LskFoLPQW5w7HTp")
-
-print(job)
-
-```
-
-Example output:
-
-```
-{
-	"_id": "r9LskFoLPQW5w7HTp",
-	"name": "Bell",
-	"type": "vectors",
-	"source": {
-		"vectors": {
-			"text1": "[ 1, 0, 0, 0 ]",
-			"text2": "[ 1/sqrt(2), 0, 0, 1/sqrt(2) ]",
-			"endianness1": "little",
-			"endianness2": "little"
-		}
-	},
-	"problem": [
-		{
-			"input": [ 1, 0, 0, 0 ],
-			"output": [ 0.7071067811865475, 0, 0, 0.7071067811865475 ]
-		}
-	],
-	"settings": {
-		"max_duration": 0,
-		"allowed_gates": "u3,cx",
-		"coupling_map": [],
-		"min_gates": 0,
-		"max_gates": 0,
-		"pre_processing": "",
-		"strategy": "strategy_a",
-		"max_diff": 0.001,
-		"diff_method": "distance",
-		"single_solution": False
-	},
-	"status": "done",
-	"output": {
-		"circuits": [
-			{
-				"qubits": 2,
-				"cregs": [],
-				"diff": 0,
-				"program": [
-					{
-						"name": "u3",
-						"wires": [ 0 ],
-						"options": {
-							"params": {
-								"theta": -1.570796370506287,
-								"phi": -3.141592741012573,
-								"lambda": -5.327113628387451
-							}
-						}
-					},
-					{
-						"name": "cx",
-						"wires": [ 0, 1 ],
-						"options": {}
-					}
-				],
-				"index": 0,
-				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[0];\ncx q[0], q[1];\n",
-				"qasmExt": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[0];\ncx q[0], q[1];\n"
-			},
-			{
-				"qubits": 2,
-				"cregs": [],
-				"diff": 0,
-				"program": [
-					{
-						"name": "u3",
-						"wires": [ 1 ],
-						"options": {
-							"params": {
-								"theta": -1.570796370506287,
-								"phi": -3.141592741012573,
-								"lambda": -5.327113628387451
-							}
-						}
-					},
-					{
-						"name": "cx",
-						"wires": [ 1, 0 ],
-						"options": {}
-					}
-				],
-				"index": 1,
-				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[1];\ncx q[1], q[0];\n",
-				"qasmExt": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[1];\ncx q[1], q[0];\n"				
-			}
-		],
-		"error_code": 0,
-		"message": "",
-		"time_taken": 0.002,
-		"version": "0.1.0"
-	},
-	"queuedAt": "2021-02-06T23:39:29.676Z",
-	"startedAt": "2021-02-06T23:39:29.926Z",
-	"finishedAt": "2021-02-06T23:39:30.383Z"
-}
-```
-
-**QPS.synth.stop_job(job_id)**
-
-Stop running or cancel queued job. Job will be put into `draft` state, and you can start it again later by calling `start_job()`.
-
-**Example:**
-
-```python
-
-from quantastica.qps_api import QPS
-
-response = QPS.synth.stop_job("SNhiCqSCT2WwRWKCd")
-
-print(response)
-
-```
-
-Example output:
-
-```
-{ _id: "SNhiCqSCT2WwRWKCd", message: "OK" }
-```
-
-
-**QPS.synth.stop_all_jobs(status_filter=None)**
-
-Stop running job / cancel all queued jobs.
-
-- `status_filter` - you can stop only a running job by providing `status_filter="running"` (after this, next job from the queue will be executed). Or, you can cancel all queued jobs by providing `status_filter="queued"` (running job will not be affected - it will continue running).
-
-**Example 1** - stop running job and remove all jobs from queue:
-
-```python
-
-from quantastica.qps_api import QPS
-
-stopped = QPS.synth.stop_all_jobs()
-
-print(stopped)
-
-```
-
-Example output:
-
-```
-{
-	"stopped": [ 
-		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary" },
-		{ "_id": "R8tJH7XoZ233oTREy", "name": "4Q Gauss", "type": "vectors" }
-	]
-}
-```
-
-**Example 2** - stop only a running job. Next job from queue, if any, will start:
-
-```python
-
-from quantastica.qps_api import QPS
-
-stopped = QPS.synth.stop_all_jobs(status_filter="running")
-
-print(stopped)
-
-```
-
-Example output:
-
-```
-{
-	"stopped": [
-		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary" }
-	]
-}
-```
-
-**Example 3** - cancel all queued jobs. Running job will not be affected:
-
-```python
-
-from quantastica.qps_api import QPS
-
-stopped = QPS.synth.stop_all_jobs(status_filter="queued")
-
-print(stopped)
-
-```
-
-Example output:
-
-```
-{
-	"stopped": [
-		{ "_id": "R8tJH7XoZ233oTREy", "name": "4Q Gauss", "type": "vectors" }
-	]
-}
-```
-
-
-**QPS.synth.start_job(job_id)**
-
-Start previously stopped/canceled job (can be any job with status `draft`).
-
-**Example:**
-
-```python
-
-from quantastica.qps_api import QPS
-
-response = QPS.synth.start_job("SNhiCqSCT2WwRWKCd")
-
-print(response)
-
-```
-
-Example output:
-
-```
-{ _id: "SNhiCqSCT2WwRWKCd", message: "OK" }
-```
-
-
 ### Circuit from vectors
 
 Find quantum circuit from pairs of initial & final state vectors (wave functions).
@@ -398,6 +77,8 @@ Find quantum circuit from pairs of initial & final state vectors (wave functions
 - `endianness` string. Orientation of bits in state vector (most significant bit/first qubit or least significant bit/first qubit). Can be `little` (like Qiskit) or `big`. Default is `little`.
 
 - `job_name` string is optional. You can give it a human readable name.
+
+- `start_job` if this argument is `True` (default) the job will be immediatelly sent to execution queue. If `start_job` is `False` then it will stay in `draft` state and you will be able to start it later by calling `start_job()` method.
 
 - `settings` object is optional. Default is:
 
@@ -417,9 +98,25 @@ Find quantum circuit from pairs of initial & final state vectors (wave functions
 
 ```
 
-Note: if `settings` argument is provided, it will overwrite default values, but only provided keys will be overwritten - not entire default settings object.
+**Settings**
 
-- `start_job` if this argument is `True` (default) the job will be immediatelly sent to execution queue. If `start_job` is `False` then it will stay in `draft` state and you will be able to start it later by calling `start_job()` method.
+- `strategy` string. Can be one of: `strategy_a` (brute force or heuristics) and `strategy_b` OptigenQ+QSD (OptigenQ is Quantastica's method to find unitary matrix from pairs of vectors, and QSD is used to decompose matrix and return circuit). Default is `strategy_a`.
+
+- `pre_processing` string. Used only with `strategy_a` (brute force or heuristics). Can be one of: `stable`, `experimental_1`, `experimental_2`, `experimental_3`, `experimental_5`. Default is empty string (Empty string means "use default" which is currently `stable`).
+
+- `allowed_gates` string. Used only with `strategy_a` (brute force or heuristics). Comma delimited gate names (instruction set) to use. Default is `u3,cx`. With `strategy_b` instruction set is fixed to `u3,cx` (you can transpile returned circuit later using `QPS.synth.transpile()` method.
+
+- `min_gates` and `max_gates` integer. Used only with `strategy_a` (brute force or heuristics). Default is `0` (no limits).
+
+- `max_diff` float. Used only with `strategy_a` (brute force or heuristics). Default is `0.001` (1e-3).
+
+- `diff_method` string. Used only with `strategy_a` (brute force or heuristics). Can be one of: `distance` (exact match), `ignorephase` (match up to a global phase) and `abs` (match absolute values). Default is `ignorephase`.
+
+- `max_duration` integer. Timeout in seconds. Solver will stop after specified number of seconds and error will be returned. Useful with brute force algorithm which has high computational complexity and can run for a very long time. You can decide when to stop (and for example proceed with the next job which is using different method and is waiting in a queue - if you prepared it). Default is `0` which means "maximum allowed by your subscription plan". Free plan has limit of a few seconds (subject to change).
+
+- `single_solution` boolean. Used only with `strategy_a` (brute force or heuristics). When `True`, solver will stop when first solution was found. When `False` solver will return all possible configurations of a circuit.
+
+Note: if `settings` argument is provided, it will overwrite default settings, but only provided keys will be overwritten - not entire default settings object.
 
 
 **Example:**
@@ -498,9 +195,45 @@ Get circuit which prepares provided state.
 
 - `job_name` string is optional. You can give it a human readable name.
 
-- `settings` object is optional. Default: see `QPS.synth.circuit_from_vectors()`.
-
 - `start_job` if this argument is `True` (default) the job will be immediatelly sent to execution queue. If `start_job` is `False` then it will stay in `draft` state and you will be able to start it later by calling `start_job()` method.
+
+- `settings` object is optional. Default is:
+
+```python
+
+{
+	"strategy": "strategy_a",
+	"pre_processing": "",
+	"allowed_gates": "u3,cx",
+	"min_gates": 0,
+	"max_gates": 0,
+	"max_diff": 0.001,
+	"diff_method": "ignorephase",
+	"max_duration": 0,
+	"single_solution": True
+}
+
+```
+
+**Settings**
+
+- `strategy` string. Can be one of: `strategy_a` (brute force or heuristics) and `strategy_b` OptigenQ+QSD (OptigenQ is Quantastica's method to find unitary matrix from pairs of vectors, after which QSD is used to decompose matrix and return circuit). Default is `strategy_a`.
+
+- `pre_processing` string. Used only with `strategy_a` (brute force or heuristics). Can be one of: `stable`, `experimental_1`, `experimental_2`, `experimental_3`, `experimental_5`. Default is empty string (Empty string means "use default" which is currently `stable`).
+
+- `allowed_gates` string. Used only with `strategy_a` (brute force or heuristics). Comma delimited gate names (instruction set) to use. Default is `u3,cx`. With `strategy_b` instruction set is fixed to `u3,cx` (you can transpile returned circuit later using `QPS.synth.transpile()` method.
+
+- `min_gates` and `max_gates` integer. Used only with `strategy_a` (brute force or heuristics). Default is `0` (no limits).
+
+- `max_diff` float. Used only with `strategy_a` (brute force or heuristics). Default is `0.001` (1e-3).
+
+- `diff_method` string. Used only with `strategy_a` (brute force or heuristics). Can be one of: `distance` (exact match), `ignorephase` (match up to a global phase) and `abs` (match absolute values). Default is `ignorephase`.
+
+- `max_duration` integer. Timeout in seconds. Solver will stop after specified number of seconds and error will be returned. Useful with brute force algorithm which has high computational complexity and can run for a very long time. You can decide when to stop (and for example proceed with the next job which is using different method and is waiting in a queue - if you prepared it). Default is `0` which means "maximum allowed by your subscription plan". Free plan has limit of a few seconds (subject to change).
+
+- `single_solution` boolean. Used only with `strategy_a` (brute force or heuristics). When `True`, solver will stop when first solution was found. When `False` solver will return all possible configurations of a circuit.
+
+Note: if `settings` argument is provided, it will overwrite default settings, but only provided keys will be overwritten - not entire default settings object.
 
 
 **Example:**
@@ -555,27 +288,35 @@ Transpile circuit (change instruction set).
 
 - `job_name` string is optional. You can give it a human readable name.
 
+- `start_job` if this argument is `True` (default) the job will be immediatelly sent to execution queue. If `start_job` is `False` then it will stay in `draft` state and you will be able to start it later by calling `start_job()` method.
+
 - `settings` object is optional. Default is:
 
 ```python
 
 {
-	"strategy": "strategy_a",
 	"pre_processing": "experimental1",
 	"allowed_gates": "u3,cx",
 	"max_diff": 0.001,
 	"diff_method": "ignorephase",
-	"max_duration": 0,
-	"single_solution": True
+	"max_duration": 0
 }
 
 ```
 
-Default `diff_method` is `distance`, which means that input and output circuit's global phase will match. That also means longer running time and possibly deeper output circuit (especially with new IBM's instruction set `id, x, sx, rz, cx`). If you are relaxed about global phase (like Qiskit's transpile method), then provide `"diff_method": "ignorephase"` in `settings`.
+**Settings**
 
-Note: if `settings` argument is provided, it will overwrite default values, but only provided keys will be overwritten - not entire default settings object.
+- `pre_processing` string. Can be one of: `stable`, `experimental_1`, `experimental_2`, `experimental_3`, `experimental_5`. Default is empty string (Empty string means "use default" which is currently `stable`).
 
-- `start_job` if this argument is `True` (default) the job will be immediatelly sent to execution queue. If `start_job` is `False` then it will stay in `draft` state and you will be able to start it later by calling `start_job()` method.
+- `allowed_gates` string. Comma delimited gate names (instruction set) to use. Default is `u3,cx`.
+
+- `max_diff` float. Default is `0.001` (1e-3).
+
+- `diff_method` string. Can be one of: `distance` (exact match), `ignorephase` (match up to a global phase) and `abs` (match absolute values). Default is `ignorephase`.
+
+- `max_duration` integer. Timeout in seconds. Solver will stop after specified number of seconds and error will be returned. Default is `0` which means "maximum allowed by your subscription plan". Free plan has limit of a few seconds (subject to change).
+
+Note: if `settings` argument is provided, it will overwrite default settings, but only provided keys will be overwritten - not entire default settings object.
 
 
 **Example:**
@@ -623,13 +364,15 @@ cx q[0], q[1];
 
 Decompose unitary matrix (find circuit from matrix).
 
-**QPS.synth.decompose_unitary(unitary, endianness = "big", job_name=None, settings = {}, start_job=True)**
+**QPS.synth.decompose_unitary(unitary, endianness="big", job_name=None, settings = {}, start_job=True)**
 
 - `unitary` matrix operator.
 
 - `endianness` - orientation of the matrix. Can be `little` endian (like Qiskit) or `big` endian. Default is `big`. Note that default endianness of the matrix differs from default endianness of vectors in other methods. That's to be aligned with QPS. In Qiskit, both matrices and vectors are `little` endian. So, if you are solving unitary from Qiskit then provide `endianness = "little"` argument.
 
 - `job_name` string is optional. You can give it a human readable name.
+
+- `start_job` if this argument is `True` (default) the job will be immediatelly sent to execution queue. If `start_job` is `False` then it will stay in `draft` state and you will be able to start it later by calling `start_job()` method.
 
 - `settings` object is optional. Default is:
 
@@ -650,9 +393,25 @@ Decompose unitary matrix (find circuit from matrix).
 
 ```
 
-Note: if `settings` argument is provided, it will overwrite default values, but only provided keys will be overwritten - not entire default settings object.
+**Settings**
 
-- `start_job` if this argument is `True` (default) the job will be immediatelly sent to execution queue. If `start_job` is `False` then it will stay in `draft` state and you will be able to start it later by calling `start_job()` method.
+- `strategy` string. Can be one of: `strategy_a` (brute force or heuristics) and `strategy_b` QSD. Default is `strategy_a`. Note that `strategy_a` (brute force or heuristics) returns circuit with optimal or near optimal depth, but this method has very high computational complexity and can run for a very long time (depending on number of qubits and total number of gates in the resulting circuit).
+
+- `pre_processing` string. Used only with `strategy_a` (brute force or heuristics). Can be one of: `stable`, `experimental_1` and `experimental_5`. Default is empty string (Empty string means "use default" which is currently `stable`). Experimental methods have lower computational complexity and should finish sooner, but that depends on many factors, so you should try all methods and see what works best for your particular problem.
+
+- `allowed_gates` string. Used only with `strategy_a` (brute force or heuristics). Comma delimited gate names (instruction set) to use. Default is `u3,cx`. With `strategy_b` instruction set is fixed to `u3,cx` (you can transpile returned circuit later using `QPS.synth.transpile()` method.
+
+- `min_gates` and `max_gates` integer. Used only with `strategy_a` (brute force or heuristics). Default is `0` (no limits).
+
+- `max_diff` float. Used only with `strategy_a` (brute force or heuristics). Default is `0.001` (1e-3).
+
+- `diff_method` string. Used only with `strategy_a` (brute force or heuristics). Can be one of: `distance` (exact match), `ignorephase` (match up to a global phase) `hs` (match up to a global phase using faster method) and `abs` (match absolute values). Default is `ignorephase`.
+
+- `max_duration` integer. Timeout in seconds. Solver will stop after specified number of seconds and error will be returned. Useful with brute force algorithm which has high computational complexity and can run for a very long time. You can decide when to stop (and for example proceed with the next job which is using different method and is waiting in a queue - if you prepared it). Default is `0` which means "maximum allowed by your subscription plan". Free plan has limit of a few seconds (subject to change).
+
+- `single_solution` boolean. Used only with `strategy_a` (brute force or heuristics). When `True`, solver will stop when first solution was found. When `False` solver will return all possible configurations of a circuit.
+
+Note: if `settings` argument is provided, it will overwrite default settings, but only provided keys will be overwritten - not entire default settings object.
 
 
 **Example:**
@@ -741,7 +500,6 @@ Create circuit which implements logical expression whose truth table is given.
 ```python
 
 {
-	"strategy": "strategy_a",
 	"pre_processing": "",
 	"allowed_gates": "x,cx,ccx,swap",
 	"coupling_map": [],
@@ -754,6 +512,25 @@ Create circuit which implements logical expression whose truth table is given.
 }
 
 ```
+
+**Settings**
+
+- `pre_processing` string. Can be one of: `stable`, `experimental_1` and `experimental_5`. Default is empty string (Empty string means "use default" which is currently `stable`).
+
+- `allowed_gates` string. Comma delimited gate names (instruction set) to use. Default is `x,cx,ccx,swap`.
+
+- `min_gates` and `max_gates` integer. Default is `0` (no limits).
+
+- `max_diff` float. Used only with `strategy_a` (brute force or heuristics). Default is `0.001` (1e-3).
+
+- `diff_method` string. Used only with `strategy_a` (brute force or heuristics). Can be one of: `distance` (exact match), `ignorephase` (match up to a global phase) and `abs` (match absolute values). Default is `ignorephase`.
+
+- `max_duration` integer. Timeout in seconds. Solver will stop after specified number of seconds and error will be returned. Useful with brute force algorithm which has high computational complexity and can run for a very long time. You can decide when to stop (and for example proceed with the next job which is using different method and is waiting in a queue - if you prepared it). Default is `0` which means "maximum allowed by your subscription plan". Free plan has limit of a few seconds (subject to change).
+
+- `single_solution` boolean. Used only with `strategy_a` (brute force or heuristics). When `True`, solver will stop when first solution was found. When `False` solver will return all possible configurations of a circuit.
+
+Note: if `settings` argument is provided, it will overwrite default settings, but only provided keys will be overwritten - not entire default settings object.
+
 
 **Example:**
 
@@ -1144,6 +921,327 @@ display(transpiled_qc.draw(output="mpl"))
 ```
 
 
+### Job management
+
+Problem sent to solver (synthesizer or transpiler) is called a "job". Each job has unique ID. Solver is resource intensive tool, so it is configured to execute only one job at a time. While solver is processing a job, other jobs are queued. When solver finishes a job, it takes the next one from the queue.
+
+API provides functions for job manipulation: you can list all jobs (filtered by status), stop running job, cancel queued jobs, stop/cancel all jobs, start previously canceled (draft) job, etc.
+
+**QPS.synth.list_jobs(status_filter=None)**
+
+List all jobs, optionally filtered by status.
+
+- `status_filter` String, optional. Can be: `draft`, `queued`, `running`, `error`, `done`.
+
+
+**Example 1** - list all (unfiltered) jobs:
+
+```python
+
+from quantastica.qps_api import QPS
+
+jobs = QPS.synth.list_jobs()
+
+print(jobs)
+
+```
+
+Example output:
+
+```
+{
+	"list": [
+		{ "_id": "r9LskFoLPQW5w7HTp", "name": "Bell state", "type": "vectors", "status": "done" },
+		{ "_id": "R8tJH7XoZ233oTREy", "name": "4Q Gauss", "type": "vectors", "status": "queued" },
+		{ "_id": "h7fzYbFz8MJvkNhiX", "name": "Challenge", "type": "unitary", "status": "draft" },
+		{ "_id": "PC5PNXiGqhh2HmkX8", "name": "Experiment", "type": "vectors", "status": "error"},
+		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary", "status": "running" }
+	]
+}
+```
+
+**Example 2** - list `running` jobs:
+
+```python
+
+from quantastica.qps_api import QPS
+
+jobs = QPS.synth.list_jobs(status_filter="running")
+
+print(jobs)
+
+```
+
+Example output:
+
+```
+{
+	"list": [
+		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary", "status": "running" }
+	]
+}
+```
+
+
+**QPS.synth.job_status(job_id)**
+
+Get job status.
+
+**Example:**
+
+```python
+
+from quantastica.qps_api import QPS
+
+status = QPS.synth.job_status("PC5PNXiGqhh2HmkX8")
+
+print(status)
+
+```
+
+Example output:
+
+```
+{ "_id": "PC5PNXiGqhh2HmkX8", "name": "Experiment", "type": "vectors", "status": "error", "message": "connect ECONNREFUSED" }
+```
+
+
+**QPS.synth.get_job(job_id, wait=True)**
+
+Get job referenced by ID. If `wait` argument is `True` (default), then function will wait for a job to finish (or fail) before returning. If `wait` is `False`, then job will be immediatelly returned even if it is still running (in which case it will not contain a solution).
+
+**Example:**
+
+```python
+
+from quantastica.qps_api import QPS
+
+job = QPS.synth.get_job("r9LskFoLPQW5w7HTp")
+
+print(job)
+
+```
+
+Example output:
+
+```
+{
+	"_id": "r9LskFoLPQW5w7HTp",
+	"name": "Bell",
+	"type": "vectors",
+	"source": {
+		"vectors": {
+			"text1": "[ 1, 0, 0, 0 ]",
+			"text2": "[ 1/sqrt(2), 0, 0, 1/sqrt(2) ]",
+			"endianness1": "little",
+			"endianness2": "little"
+		}
+	},
+	"problem": [
+		{
+			"input": [ 1, 0, 0, 0 ],
+			"output": [ 0.7071067811865475, 0, 0, 0.7071067811865475 ]
+		}
+	],
+	"settings": {
+		"max_duration": 0,
+		"allowed_gates": "u3,cx",
+		"coupling_map": [],
+		"min_gates": 0,
+		"max_gates": 0,
+		"pre_processing": "",
+		"strategy": "strategy_a",
+		"max_diff": 0.001,
+		"diff_method": "distance",
+		"single_solution": False
+	},
+	"status": "done",
+	"output": {
+		"circuits": [
+			{
+				"qubits": 2,
+				"cregs": [],
+				"diff": 0,
+				"program": [
+					{
+						"name": "u3",
+						"wires": [ 0 ],
+						"options": {
+							"params": {
+								"theta": -1.570796370506287,
+								"phi": -3.141592741012573,
+								"lambda": -5.327113628387451
+							}
+						}
+					},
+					{
+						"name": "cx",
+						"wires": [ 0, 1 ],
+						"options": {}
+					}
+				],
+				"index": 0,
+				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[0];\ncx q[0], q[1];\n",
+				"qasmExt": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[0];\ncx q[0], q[1];\n"
+			},
+			{
+				"qubits": 2,
+				"cregs": [],
+				"diff": 0,
+				"program": [
+					{
+						"name": "u3",
+						"wires": [ 1 ],
+						"options": {
+							"params": {
+								"theta": -1.570796370506287,
+								"phi": -3.141592741012573,
+								"lambda": -5.327113628387451
+							}
+						}
+					},
+					{
+						"name": "cx",
+						"wires": [ 1, 0 ],
+						"options": {}
+					}
+				],
+				"index": 1,
+				"qasm": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[1];\ncx q[1], q[0];\n",
+				"qasmExt": "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nu3 (-1.570796370506287, -3.141592741012573, -5.327113628387451) q[1];\ncx q[1], q[0];\n"				
+			}
+		],
+		"error_code": 0,
+		"message": "",
+		"time_taken": 0.002,
+		"version": "0.1.0"
+	},
+	"queuedAt": "2021-02-06T23:39:29.676Z",
+	"startedAt": "2021-02-06T23:39:29.926Z",
+	"finishedAt": "2021-02-06T23:39:30.383Z"
+}
+```
+
+**QPS.synth.stop_job(job_id)**
+
+Stop running or cancel queued job. Job will be put into `draft` state, and you can start it again later by calling `start_job()`.
+
+**Example:**
+
+```python
+
+from quantastica.qps_api import QPS
+
+response = QPS.synth.stop_job("SNhiCqSCT2WwRWKCd")
+
+print(response)
+
+```
+
+Example output:
+
+```
+{ _id: "SNhiCqSCT2WwRWKCd", message: "OK" }
+```
+
+
+**QPS.synth.stop_all_jobs(status_filter=None)**
+
+Stop running job / cancel all queued jobs.
+
+- `status_filter` - you can stop only a running job by providing `status_filter="running"` (after this, next job from the queue will be executed). Or, you can cancel all queued jobs by providing `status_filter="queued"` (running job will not be affected - it will continue running).
+
+**Example 1** - stop running job and remove all jobs from queue:
+
+```python
+
+from quantastica.qps_api import QPS
+
+stopped = QPS.synth.stop_all_jobs()
+
+print(stopped)
+
+```
+
+Example output:
+
+```
+{
+	"stopped": [ 
+		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary" },
+		{ "_id": "R8tJH7XoZ233oTREy", "name": "4Q Gauss", "type": "vectors" }
+	]
+}
+```
+
+**Example 2** - stop only a running job. Next job from queue, if any, will start:
+
+```python
+
+from quantastica.qps_api import QPS
+
+stopped = QPS.synth.stop_all_jobs(status_filter="running")
+
+print(stopped)
+
+```
+
+Example output:
+
+```
+{
+	"stopped": [
+		{ "_id": "SNhiCqSCT2WwRWKCd", "name": "Decompose", "type": "unitary" }
+	]
+}
+```
+
+**Example 3** - cancel all queued jobs. Running job will not be affected:
+
+```python
+
+from quantastica.qps_api import QPS
+
+stopped = QPS.synth.stop_all_jobs(status_filter="queued")
+
+print(stopped)
+
+```
+
+Example output:
+
+```
+{
+	"stopped": [
+		{ "_id": "R8tJH7XoZ233oTREy", "name": "4Q Gauss", "type": "vectors" }
+	]
+}
+```
+
+
+**QPS.synth.start_job(job_id)**
+
+Start previously stopped/canceled job (can be any job with status `draft`).
+
+**Example:**
+
+```python
+
+from quantastica.qps_api import QPS
+
+response = QPS.synth.start_job("SNhiCqSCT2WwRWKCd")
+
+print(response)
+
+```
+
+Example output:
+
+```
+{ _id: "SNhiCqSCT2WwRWKCd", message: "OK" }
+```
+
+
 ## Quantum Language Converter API
 
 [Quantum Language Converter](https://quantastica.com/#converters) is a tool which converts quantum program between different quantum programming languages and frameworks. It is also available as a [q-convert](https://www.npmjs.com/package/q-convert) command line tool and as a web UI at [https://quantum-circuit.com/qconvert](https://quantum-circuit.com/qconvert).
@@ -1238,6 +1336,7 @@ measure q[1] -> c[1];
 
 output_svg = QPS.converter.convert(input_program, "qasm", "svg")
 
+# Do something with returned vector image...
 open("output.svg", "w").write(output_svg)
 
 ```
