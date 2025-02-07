@@ -18,11 +18,9 @@ pip install quantastica-qps-api
 **3. Configure QPS API package with your API token:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 QPS.save_account("YOUR_API_TOKEN")
-
 ```
 
 That will create a local configuration file where your API token will be stored for future use.
@@ -83,7 +81,6 @@ Find quantum circuit from pairs of initial & final state vectors (wave functions
 - `settings` object is optional. Default is:
 
 ```python
-
 {
 	"strategy": "strategy_a",
 	"pre_processing": "",
@@ -95,7 +92,6 @@ Find quantum circuit from pairs of initial & final state vectors (wave functions
 	"max_duration": 0,
 	"single_solution": True
 }
-
 ```
 
 **Settings**
@@ -122,7 +118,6 @@ Note: if `settings` argument is provided, it will overwrite default settings, bu
 **Example:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 vector_pairs = [
@@ -200,7 +195,6 @@ Get circuit which prepares provided state.
 - `settings` object is optional. Default is:
 
 ```python
-
 {
 	"strategy": "strategy_a",
 	"pre_processing": "",
@@ -239,7 +233,6 @@ Note: if `settings` argument is provided, it will overwrite default settings, bu
 **Example:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 desired_state = [0.5, 0.5, 0.5, 0.5]
@@ -293,7 +286,6 @@ Transpile circuit (change instruction set).
 - `settings` object is optional. Default is:
 
 ```python
-
 {
 	"pre_processing": "experimental1",
 	"allowed_gates": "u3,cx",
@@ -322,7 +314,6 @@ Note: if `settings` argument is provided, it will overwrite default settings, bu
 **Example:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 input_qasm = """
@@ -377,7 +368,6 @@ Decompose unitary matrix (find circuit from matrix).
 - `settings` object is optional. Default is:
 
 ```python
-
 {
 	"strategy": "strategy_a",
 	"pre_processing": "",
@@ -417,7 +407,6 @@ Note: if `settings` argument is provided, it will overwrite default settings, bu
 **Example:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 unitary = [
@@ -498,7 +487,6 @@ Create circuit which implements logical expression whose truth table is given.
 - `settings` object is optional. Default is:
 
 ```python
-
 {
 	"pre_processing": "",
 	"allowed_gates": "x,cx,ccx,swap",
@@ -535,7 +523,6 @@ Note: if `settings` argument is provided, it will overwrite default settings, bu
 **Example:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 truth_table = """
@@ -591,7 +578,6 @@ Solve problem provided in internal format used by synthesizer and transpiler.
 **Example:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 problem = {
@@ -757,7 +743,6 @@ gpi2 (2.51678906856393) q[0];
 **Example job object with output:**
 
 ```python
-
 {
 	"_id": "r9LskFoLPQW5w7HTp",
 	"name": "Bell",
@@ -937,7 +922,6 @@ List all jobs, optionally filtered by status.
 **Example 1** - list all (unfiltered) jobs:
 
 ```python
-
 from quantastica.qps_api import QPS
 
 jobs = QPS.synth.list_jobs()
@@ -963,7 +947,6 @@ Example output:
 **Example 2** - list `running` jobs:
 
 ```python
-
 from quantastica.qps_api import QPS
 
 jobs = QPS.synth.list_jobs(status_filter="running")
@@ -990,7 +973,6 @@ Get job status.
 **Example:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 status = QPS.synth.job_status("PC5PNXiGqhh2HmkX8")
@@ -1013,7 +995,6 @@ Get job referenced by ID. If `wait` argument is `True` (default), then function 
 **Example:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 job = QPS.synth.get_job("r9LskFoLPQW5w7HTp")
@@ -1129,7 +1110,6 @@ Stop running or cancel queued job. Job will be put into `draft` state, and you c
 **Example:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 response = QPS.synth.stop_job("SNhiCqSCT2WwRWKCd")
@@ -1141,7 +1121,7 @@ print(response)
 Example output:
 
 ```python
-{ "_id": "SNhiCqSCT2WwRWKCd", message: "OK" }
+{ "_id": "SNhiCqSCT2WwRWKCd", "message": "OK" }
 ```
 
 
@@ -1154,7 +1134,6 @@ Stop running job / cancel all queued jobs.
 **Example 1** - stop running job and remove all jobs from queue:
 
 ```python
-
 from quantastica.qps_api import QPS
 
 stopped = QPS.synth.stop_all_jobs()
@@ -1177,7 +1156,6 @@ Example output:
 **Example 2** - stop only a running job. Next job from queue, if any, will start:
 
 ```python
-
 from quantastica.qps_api import QPS
 
 stopped = QPS.synth.stop_all_jobs(status_filter="running")
@@ -1199,7 +1177,6 @@ Example output:
 **Example 3** - cancel all queued jobs. Running job will not be affected:
 
 ```python
-
 from quantastica.qps_api import QPS
 
 stopped = QPS.synth.stop_all_jobs(status_filter="queued")
@@ -1226,7 +1203,6 @@ Start previously stopped/canceled job (can be any job with status `draft`).
 **Example:**
 
 ```python
-
 from quantastica.qps_api import QPS
 
 response = QPS.synth.start_job("SNhiCqSCT2WwRWKCd")
@@ -1272,6 +1248,7 @@ Converts `input` quantum program given as string from `source` format into `dest
 	- `qobj` [QObj](https://arxiv.org/abs/1809.03452)
 	- `quil` [Quil](https://arxiv.org/abs/1608.03355)
 	- `pyquil` [pyQuil](http://docs.rigetti.com/en/latest/index.html)
+	- `cudaq` [CudaQ](https://nvidia.github.io/cuda-quantum/latest/index.html)
 	- `braket` [Braket](https://docs.aws.amazon.com/braket/)
 	- `cirq` [Cirq](https://github.com/quantumlib/Cirq)
 	- `tfq` [TensorFlow Quantum](https://www.tensorflow.org/quantum)
@@ -1318,7 +1295,7 @@ MEASURE 1 ro[1]
 ```
 
 
-**Example 2** - convert QASM 2.0 program to circuit drawing as vector image:
+**Example 2** - convert QASM 2.0 program to circuit drawing (vector image):
 
 ```python
 from quantastica.qps_api import QPS
