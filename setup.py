@@ -23,7 +23,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="quantastica-qps-api",
-    version="0.9.12",
+    version="0.9.13",
     description="Quantastica Quantum Programming Studio API",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -41,6 +41,6 @@ setup(
     namespace_packages=["quantastica"],
     packages=find_namespace_packages(),
     include_package_data=True,
-    install_requires=["configparser", "requests"],
-    entry_points={},
+    install_requires=["requests"],
+    entry_points={}
 )

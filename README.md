@@ -17,26 +17,54 @@ pip install quantastica-qps-api
 
 **3. Configure QPS API package with your API token:**
 
+Make sure that environment variable `QPS_API_KEY` contains your API token.
+
+**Now you are ready to use QPS API.**
+
+
+Alternativelly, you can temporary set your API token:
+
+```python
+from quantastica.qps_api import QPS
+
+QPS.use_account("YOUR_API_TOKEN")
+```
+
+
+You can also save your API token to local configuration file for future use:
+
 ```python
 from quantastica.qps_api import QPS
 
 QPS.save_account("YOUR_API_TOKEN")
 ```
 
-That will create a local configuration file where your API token will be stored for future use.
-
-**Now you are ready to use QPS API.**
+*Note: saving API token in local configuration file is not recommented and we advise you to use environment variable instead.*
 
 
 ## Account management
 
+**QPS.use_account(api_token, api_url=None)**
+
+Method will temporary set provided API token to be used. This will not store your token.
+
+*Note: it is not recommended to expose your API token in source code. Please use environment variable instead*
+
+
 **QPS.save_account(api_token, api_url=None)**
 
-**Run this once** to setup your QPS REST API account. Method will create configuration file and your api token will be stored there for future use.
+Method will create configuration file and your api token will be stored there for future use.
 
 If needed, you can clear your token by running `QPS.save_account("")` (or by deleting a configuration file).
 
-If `api_url` is not provided then `https://quantum-circuit.com/api/` will be set as default.
+*Note: it is not recommended to store your API token in configuration file. Please use environment variable instead*
+
+
+**QPS.load_account()**
+
+Method will load previously stored API token from local configuration file.
+
+*Note: it is not recommended to keep your API token in configuration file. Please use environment variable instead*
 
 
 **QPS.config_path()**
@@ -468,7 +496,7 @@ h q[1];
 ```
 
 
-### Create algorithm from truth table
+### Create circuit from truth table
 
 Create circuit which implements logical expression whose truth table is given.
 
@@ -562,9 +590,9 @@ ccx q[0], q[1], q[2];
 ```
 
 
-### Run problem file
+### Run synthesizer or transpiler job defined in JSON file
 
-Solve problem provided in internal format used by synthesizer and transpiler.
+Solve problem provided in JSON format used by synthesizer and transpiler.
 
 **QPS.synth.solve(problem, settings = {}, start_job=True)**
 
