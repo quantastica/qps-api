@@ -448,6 +448,7 @@ class QPSAPI:
 
         self.http_timeout = 3
         self.http_max_retries = 3
+        self.retry_delay_seconds = 1
 
         self.synth = QGENAPI(self)
 
@@ -462,24 +463,29 @@ class QPSAPI:
 
 
     def http_post(self, url, headers, json):
-        timeout_counter = 0
-
-        response = None
-        while True:
+        for retry_count in range(self.http_max_retries):
             try:
-                response = requests.post(url=url, headers=headers, json=json, timeout=self.http_timeout)
-            except Exception as e:
-                if(type(e) == requests.exceptions.ConnectTimeout):
-                    timeout_counter += 1
-
-                    if(timeout_counter >= self.http_max_retries):
-                        raise
-                else:
-                    raise
-            else:
+                # Attempt to make the request
+                response = requests.post(
+                    url=url, 
+                    headers=headers, 
+                    json=json, 
+                    timeout=self.http_timeout
+                )
+                
                 response.raise_for_status()
 
-        return response
+                return response
+
+            except requests.exceptions.RequestException as e:
+                if retry_count == self.http_max_retries - 1:
+                    print(f"Maximum retries ({self.http_max_retries}) exceeded. Giving up.")
+                    raise
+
+                print(f"Retrying in {self.retry_delay_seconds} seconds...")
+                time.sleep(self.retry_delay_seconds)
+
+        return None
 
 
     def config_path(self):
