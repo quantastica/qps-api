@@ -3,6 +3,7 @@ import configparser
 import requests
 import time
 import csv
+import json
 from io import StringIO
 from copy import deepcopy
 
@@ -38,10 +39,10 @@ class QGENAPI:
         create_url = _urljoin(self.qps_api.api_url, "generator", "job", "create")
 
         create_response = self.qps_api.http_post(url = create_url, headers = headers, json = problem)
-        
+
         create_response.raise_for_status()
         create_result = create_response.json()
-        
+
         job_id = create_result["_id"]
 
         if(start_job == True):
@@ -62,7 +63,7 @@ class QGENAPI:
             list_data["status"] = status_filter
 
         list_response = self.qps_api.http_post(url = list_url, headers = headers, json = list_data)
-        
+
         list_response.raise_for_status()
         list_result = list_response.json()
 
@@ -74,7 +75,7 @@ class QGENAPI:
 
         status_url = _urljoin(self.qps_api.api_url, "generator", "job", "status")
         status_data = { "_id": job_id }
-        
+
         status_response = self.qps_api.http_post(url = status_url, headers = headers, json = status_data)
 
         status_response.raise_for_status()
@@ -88,7 +89,7 @@ class QGENAPI:
 
         stop_url = _urljoin(self.qps_api.api_url, "generator", "job", "stop")
         stop_data = { "_id": job_id }
-        
+
         stop_response = self.qps_api.http_post(url = stop_url, headers = headers, json = stop_data)
 
         stop_response.raise_for_status()
@@ -106,7 +107,7 @@ class QGENAPI:
             stop_data["status"] = status_filter
 
         stop_response = self.qps_api.http_post(url = stop_url, headers = headers, json = stop_data)
-        
+
         stop_response.raise_for_status()
         stop_result = stop_response.json()
 
@@ -118,7 +119,7 @@ class QGENAPI:
 
         start_url = _urljoin(self.qps_api.api_url, "generator", "job", "start")
         start_data = { "_id": job_id }
-        
+
         start_response = self.qps_api.http_post(url = start_url, headers = headers, json = start_data)
 
         start_response.raise_for_status()
@@ -136,7 +137,7 @@ class QGENAPI:
             #
             status_url = _urljoin(self.qps_api.api_url, "generator", "job", "status")
             status_data = { "_id": job_id }
-            
+
             while True:
                 status_response = self.qps_api.http_post(url = status_url, headers = headers, json = status_data)
 
@@ -152,7 +153,7 @@ class QGENAPI:
                     if(message is None or message == ""):
                         message = "Unknown error"
                     break
-                    
+
                 time.sleep(1)
 
         #
@@ -195,7 +196,7 @@ class QGENAPI:
 
         if(job_name is not None):
             problem["name"] = job_name
-        
+
         for key in method_options.keys():
             if(key != "qasm" and key != "method"):
                 problem["source"]["circuit"][key] = method_options[key]
@@ -345,7 +346,7 @@ class QGENAPI:
         coldefs.sort(key=lambda x: x["index"])
 
         # check if col indexes are unique
-        col_indexes = list(o["index"] for o in coldefs)    
+        col_indexes = list(o["index"] for o in coldefs)
         if len(col_indexes) > len(set(col_indexes)):
             raise Exception("Column indexes are not unique.")
 
@@ -384,15 +385,22 @@ class QCONVERTAPI:
     def convert(self, input_data, source_format, dest_format):
         headers = {"Authorization": "Bearer " + self.qps_api.api_token }
 
+        input_string = ""
+        if isinstance(input_data, dict):
+            input_string = json.dumps(input_data)
+        elif isinstance(input_data, str):
+            input_string = input_data
+        else:
+            input_string = str(data)
+
         convert_url = _urljoin(self.qps_api.api_url, "qconvert")
         convert_data = {}
-        convert_data["input"] = str(input_data)
+        convert_data["input"] = input_string
         convert_data["source"] = str(source_format)
         convert_data["dest"] = str(dest_format)
 
-
         convert_response = self.qps_api.http_post(url=convert_url, headers=headers, json=convert_data)
-        
+
         convert_response.raise_for_status()
         convert_result = convert_response.text
 
@@ -429,7 +437,7 @@ class QUTILSAPI:
 
 
         random_circuit_response = self.qps_api.http_post(url=random_circuit_url, headers=headers, json=random_circuit_data)
-        
+
         random_circuit_response.raise_for_status()
         random_circuit_result = random_circuit_response.text
 
@@ -463,27 +471,48 @@ class QPSAPI:
 
 
     def http_post(self, url, headers, json):
+        RETRYABLE_STATUS_CODES = { 500, 502, 503, 504 }
+        print("http request", url)
         for retry_count in range(self.http_max_retries):
             try:
-                # Attempt to make the request
                 response = requests.post(
-                    url=url, 
-                    headers=headers, 
-                    json=json, 
+                    url=url,
+                    headers=headers,
+                    json=json,
                     timeout=self.http_timeout
                 )
-                
-                response.raise_for_status()
 
-                return response
+                if response.status_code in RETRYABLE_STATUS_CODES:
+                    error_message = f"Server returned {response.status_code}. Retrying..."
+                    print(error_message)
+                else:
+                    response.raise_for_status()
+                    return response
+
+            except requests.exceptions.ConnectionError as e:
+                error_message = f"Connection error occurred: {e.__class__.__name__}. Retrying..."
+                print(error_message)
+
+            except requests.exceptions.Timeout:
+                error_message = "Request timed out. Retrying..."
+                print(error_message)
+
+            except requests.exceptions.HTTPError as e:
+                print(f"Non-retryable HTTP Error: {e.response.status_code}. Giving up.")
+                raise
 
             except requests.exceptions.RequestException as e:
-                if retry_count == self.http_max_retries - 1:
-                    print(f"Maximum retries ({self.http_max_retries}) exceeded. Giving up.")
-                    raise
+                error_message = f"An unexpected RequestException occurred: {e.__class__.__name__}. Giving up."
+                print(error_message)
+                raise
 
-                print(f"Retrying in {self.retry_delay_seconds} seconds...")
-                time.sleep(self.retry_delay_seconds)
+            if retry_count == self.http_max_retries - 1:
+                print(f"Maximum retries ({self.http_max_retries}) exceeded. Giving up.")
+                raise requests.exceptions.RequestException(f"Failed after {self.http_max_retries} retries.")
+
+
+            print(f"Retrying in {self.retry_delay_seconds} seconds...")
+            time.sleep(self.retry_delay_seconds)
 
         return None
 
