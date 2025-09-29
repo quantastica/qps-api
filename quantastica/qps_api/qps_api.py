@@ -472,7 +472,7 @@ class QPSAPI:
 
     def http_post(self, url, headers, json):
         RETRYABLE_STATUS_CODES = { 500, 502, 503, 504 }
-        print("http request", url)
+
         for retry_count in range(self.http_max_retries):
             try:
                 response = requests.post(
