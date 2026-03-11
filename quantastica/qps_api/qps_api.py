@@ -22,6 +22,9 @@ class QGENAPI:
         if("settings" not in problem):
             problem["settings"] = {}
 
+        if not settings:
+            settings = {}
+
         for key in settings.keys():
             if(key == "instruction_set"):
                 problem["settings"]["allowed_gates"] = ",".join(settings["instruction_set"])
@@ -196,6 +199,9 @@ class QGENAPI:
 
         if(job_name is not None):
             problem["name"] = job_name
+
+        if not method_options:
+            method_options = {}
 
         for key in method_options.keys():
             if(key != "qasm" and key != "method"):
@@ -421,19 +427,20 @@ class QUTILSAPI:
 
         random_circuit_data = {}
 
-        random_circuit_data["num_qubits"] = num_qubits
+        random_circuit_data["num_qubits"] = int(num_qubits)
         random_circuit_data["format"] = str(output_format)
 
-        if "num_gates" in options:
-            random_circuit_data["num_gates"] = options["num_gates"]
-        if "instruction_set" in options:
-            random_circuit_data["instruction_set"] = options["instruction_set"]
-        if "mid_circuit_measurement" in options:
-            random_circuit_data["mid_circuit_measurement"] = options["mid_circuit_measurement"]
-        if "mid_circuit_reset" in options:
-            random_circuit_data["mid_circuit_reset"] = options["mid_circuit_reset"]
-        if "classic_control" in options:
-            random_circuit_data["classic_control"] = options["classic_control"]
+        if options:
+            if "num_gates" in options:
+                random_circuit_data["num_gates"] = options["num_gates"]
+            if "instruction_set" in options:
+                random_circuit_data["instruction_set"] = options["instruction_set"]
+            if "mid_circuit_measurement" in options:
+                random_circuit_data["mid_circuit_measurement"] = options["mid_circuit_measurement"]
+            if "mid_circuit_reset" in options:
+                random_circuit_data["mid_circuit_reset"] = options["mid_circuit_reset"]
+            if "classic_control" in options:
+                random_circuit_data["classic_control"] = options["classic_control"]
 
 
         random_circuit_response = self.qps_api.http_post(url=random_circuit_url, headers=headers, json=random_circuit_data)

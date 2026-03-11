@@ -1349,7 +1349,7 @@ open("output.svg", "w").write(output_svg)
 
 ## Utils API
 
-**QPS.utils.random_circuit(num_qubits=5, output_format="quantum-circuit", options=None)**
+**QPS.utils.random_circuit(num_qubits=5, output_format="quantum-circuit", options={})**
 
 Returns random quantum circuit.
 
@@ -1365,3 +1365,14 @@ Returns random quantum circuit.
 	- `mid_circuit_reset` Bool. Default: `False`.
 	- `classic_control` Bool. Default: `False`.
 
+
+**Example:**
+
+```python
+from quantastica.qps_api import QPS
+
+random_circuit = QPS.utils.random_circuit(num_qubits=5, output_format="qasm")
+
+print(random_circuit)
+
+```
