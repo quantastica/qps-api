@@ -1246,6 +1246,28 @@ Example output:
 ```
 
 
+**QPS.synth.reset_job(job_id)**
+
+Reset a finished job or job in error state into draft state so it can be started again by calling `start_job()`.
+
+**Example:**
+
+```python
+from quantastica.qps_api import QPS
+
+response = QPS.synth.start_job("SNhiCqSCT2WwRWKCd")
+
+print(response)
+
+```
+
+Example output:
+
+```python
+{ "_id": "SNhiCqSCT2WwRWKCd", "message": "OK" }
+```
+
+
 ## Quantum Language Converter API
 
 [Quantum Language Converter](https://quantastica.com/#converters) is a tool which converts quantum program between different quantum programming languages and frameworks. It is also available as a [q-convert](https://www.npmjs.com/package/q-convert) command line tool and as a web UI at [https://quantum-circuit.com/qconvert](https://quantum-circuit.com/qconvert).

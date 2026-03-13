@@ -131,6 +131,20 @@ class QGENAPI:
         return start_result
 
 
+    def reset_job(self, job_id):
+        headers = {"Authorization": "Bearer " + self.qps_api.api_token }
+
+        reset_url = _urljoin(self.qps_api.api_url, "generator", "job", "reset")
+        reset_data = { "_id": job_id }
+
+        reset_response = self.qps_api.http_post(url = reset_url, headers = headers, json = reset_data)
+
+        reset_response.raise_for_status()
+        reset_result = reset_response.json()
+
+        return reset_result
+
+
     def get_job(self, job_id, wait=True):
         headers = {"Authorization": "Bearer " + self.qps_api.api_token }
 
