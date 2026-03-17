@@ -1,6 +1,6 @@
-# Quantum Programming Studio API
+# Quantum Programming Studio SDK for python
 
-Python wrapper for [Quantum Programming Studio](https://quantum-circuit.com/) HTTP API.
+Python wrapper for [Quantum Programming Studio HTTP API](https://quantum-circuit.com/api-docs).
 
 
 ## Install and configure
@@ -22,83 +22,26 @@ Make sure that environment variable `QPS_API_KEY` contains your API token.
 **Now you are ready to use QPS API.**
 
 
-Alternativelly, you can temporary set your API token:
-
-```python
-from quantastica.qps_api import QPS
-
-QPS.use_account("YOUR_API_TOKEN")
-```
-
-
-You can also save your API token to local configuration file for future use:
-
-```python
-from quantastica.qps_api import QPS
-
-QPS.save_account("YOUR_API_TOKEN")
-```
-
-*Note: saving API token in local configuration file is not recommented and we advise you to use environment variable instead.*
-
-
-## Account management
-
-**QPS.use_account(api_token, api_url=None)**
-
-Method will temporary set provided API token to be used. This will not store your token.
-
-*Note: it is not recommended to expose your API token in source code. Please use environment variable instead*
-
-
-**QPS.save_account(api_token, api_url=None)**
-
-Method will create configuration file and your api token will be stored there for future use.
-
-If needed, you can clear your token by running `QPS.save_account("")` (or by deleting a configuration file).
-
-*Note: it is not recommended to store your API token in configuration file. Please use environment variable instead*
-
-
-**QPS.load_account()**
-
-Method will load previously stored API token from local configuration file.
-
-*Note: it is not recommended to keep your API token in configuration file. Please use environment variable instead*
-
-
-**QPS.config_path()**
-
-You can get config file path by running `QPS.config_path()`.
-
-Default configuration file path:
-
-- On Unix, directory is obtained from environment variable HOME if it is set; otherwise the current user’s home directory is looked up in the password directory through the built-in module pwd.
-
-- On Windows, USERPROFILE will be used if set, otherwise a combination of HOMEPATH and HOMEDRIVE will be used.
-
-
-
 ## Synthesis and transpilation API
 
 Synthesis and transpilation tool can be used to:
 
-- create quantum circuit from state vectors
+- Create quantum circuit from state vectors
 
-- create quantum circuit from truth table
+- Create quantum circuit from truth table
 
-- create quantum circuit from unitary matrix (decompose unitary matrix)
+- Create quantum circuit from unitary matrix (decompose unitary matrix)
 
-- transpile circuits (change instruction set)
+- Transpile circuits (change instruction set)
 
 
 ### Circuit from vectors
 
-Find quantum circuit from pairs of initial & final state vectors (wave functions).
+Find quantum circuit from pairs of initial & final (target) state vectors (wave functions).
 
 **QPS.synth.circuit_from_vectors(vector_pairs, endianness = "little", job_name=None, settings = {}, start_job=True)**
 
-- `vector_pairs` is list containing vector pairs. Each vector pair is list with 2 elements: initial vector and final vector. All vectors in all pairs must be of same length (same number of qubits).
+- `vector_pairs` is list containing vector pairs. Each vector pair is list with 2 elements: initial vector and final (target) vector. All vectors in all pairs must be of same length (same number of qubits).
 
 - `endianness` string. Orientation of bits in state vector (most significant bit/first qubit or least significant bit/first qubit). Can be `little` (like Qiskit) or `big`. Default is `little`.
 
